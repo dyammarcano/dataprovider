@@ -110,14 +110,19 @@ type User struct {
 func main() {
 	// Create a config with driver name to initialize the data provider
 	opts := dataprovider.NewOptions(
-		    dataprovider.WithDriver(dataprovider.MemoryDataProviderName),
-		    dataprovider.WithConnectionString("file:test.sqlite3?cache=shared"),
-		)
+		dataprovider.WithDriver(dataprovider.PostgreSQLDatabaseProviderName),
+		dataprovider.WithHost("localhost"),
+		dataprovider.WithPort(5432),
+		dataprovider.WithName("postgres"),
+		dataprovider.WithUsername("postgres"),
+		dataprovider.WithPassword("mysecretpassword"),
+	)
 
+	// Instantiate the database provider with the options and panic if an error occurs
 	var provider = dataprovider.Must(dataprovider.NewDataProvider(opts))
 
 	// Initialize the database
-	query := "CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, first_name TEXT, last_name TEXT, email TEXT, gender TEXT, ip_address TEXT, city TEXT);"
+	query := "CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, first_name TEXT, last_name TEXT, email TEXT, gender TEXT, ip_address TEXT, city TEXT);"
 	if err := provider.InitializeDatabase(query); err != nil {
 		panic(err)
 	}
@@ -134,7 +139,7 @@ func main() {
 	tx.MustExec("insert into users (first_name, last_name, email, gender, ip_address, city) values ('Ray', 'Ginnaly', 'rginnaly2@merriam-webster.com', 'Male', '76.71.94.89', 'Al Baqāliţah');")
 
 	// Commit the transaction
-	if err = tx.Commit(); err != nil {
+	if err := tx.Commit(); err != nil {
 		panic(err)
 	}
 
@@ -161,4 +166,10 @@ func main() {
 		panic(err)
 	}
 }
+```
+
+# How to compilw
+
+```shell
+go build -tags postgres
 ```
